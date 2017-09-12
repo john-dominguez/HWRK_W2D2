@@ -2,18 +2,25 @@ class Board
   attr_accessor :cups
 
   def initialize(name1, name2)
-    @cups = Array.new(14){0}
-
+    @name1 = name1
+    @name2 = name2
+    @cups = Array.new(14) { Array.new }
+    place_stones
   end
 
   def place_stones
     # helper method to #initialize every non-store cup with four stones each
-    @cups.each {|cup| cup.count = 4}
-    @cups[6].count = 0
-    @cups[13].count = 0
+    @cups.take(6).each do |cup|
+      4.times { cup << :stone }
+    end
+    @cups[7..12].each do |cup|
+      4.times { cup << :stone }
+    end
   end
 
   def valid_move?(start_pos)
+    raise InvalidStartingCupError if @cups[start_pos].empty?
+    raise InvalidStartingCupError if start_pos < 0 || start_pos > 12
   end
 
   def make_move(start_pos, current_player_name)
@@ -40,5 +47,23 @@ class Board
   end
 
   def winner
+    player1_score =@cups[6].count
+
+    player2_score = @cups[13].count
+
+    case player1_score <=> player2_score
+    when -1
+      @name2
+    when 0
+      :draw
+    when 1
+      @name1
+    end
+  end
+end
+
+class InvalidStartingCupError < StandardError
+  def message
+    "Invalid starting cup"
   end
 end
